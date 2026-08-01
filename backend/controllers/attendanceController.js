@@ -147,6 +147,43 @@ const getAttendanceByStudent = async (req, res) => {
 };
 
 // ====================================
+// GET ATTENDANCE BY SUBJECT
+// ====================================
+const getAttendanceBySubject = async (req, res) => {
+  try {
+    const { subjectId } = req.params;
+
+    const { data, error } = await supabase
+      .from("Attendance")
+      .select(`
+        *,
+        Students(id, full_name, enrollment_no),
+        Subjects(id, subject_name, subject_code)
+      `)
+      .eq("subject_id", subjectId)
+      .order("attendance_date", { ascending: false });
+
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        error: error.message,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      count: data.length,
+      attendance: data,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      error: err.message,
+    });
+  }
+};
+
+// ====================================
 // GET ATTENDANCE PERCENTAGE
 // ====================================
 const getAttendancePercentage = async (req, res) => {
@@ -271,6 +308,7 @@ module.exports = {
   getAttendance,
   getAttendanceById,
   getAttendanceByStudent,
+  getAttendanceBySubject,
   getAttendancePercentage,
   updateAttendance,
   deleteAttendance,

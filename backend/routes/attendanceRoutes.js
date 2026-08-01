@@ -6,6 +6,7 @@ const {
   getAttendance,
   getAttendanceById,
   getAttendanceByStudent,
+  getAttendanceBySubject,
   getAttendancePercentage,
   updateAttendance,
   deleteAttendance,
@@ -17,6 +18,7 @@ router.post("/", markAttendance);
 // READ
 router.get("/", getAttendance);
 router.get("/student/:studentId", getAttendanceByStudent);
+router.get("/subject/:subjectId", getAttendanceBySubject);
 router.get("/percentage/:studentId", getAttendancePercentage);
 router.get("/:id", getAttendanceById);
 

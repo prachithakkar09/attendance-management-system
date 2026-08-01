@@ -73,6 +73,48 @@ const getStudents = async (req, res) => {
 };
 
 // ====================================
+// SEARCH STUDENTS
+// GET /api/students/search?query=...
+// ====================================
+const searchStudents = async (req, res) => {
+  try {
+    const { query } = req.query;
+
+    if (!query) {
+      return res.status(400).json({
+        success: false,
+        error: "Search query is required",
+      });
+    }
+
+    const { data, error } = await supabase
+      .from("Students")
+      .select("*")
+      .or(
+        `full_name.ilike.%${query}%,enrollment_no.ilike.%${query}%,email.ilike.%${query}%`
+      );
+
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        error: error.message,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      count: data.length,
+      students: data,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      error: err.message,
+    });
+  }
+};
+
+// ====================================
 // GET STUDENT BY ID
 // GET /api/students/:id
 // ====================================
@@ -182,6 +224,7 @@ const deleteStudent = async (req, res) => {
 module.exports = {
   addStudent,
   getStudents,
+  searchStudents,
   getStudentById,
   updateStudent,
   deleteStudent,

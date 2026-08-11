@@ -6,7 +6,14 @@ const supabase = require("../config/supabase");
 // ====================================
 const addStudent = async (req, res) => {
   try {
-    const { enrollment_no, full_name, email, department, semester } = req.body;
+    const {
+      enrollment_no,
+      full_name,
+      email,
+      department,
+      semester,
+      batch_id,
+    } = req.body;
 
     const { data, error } = await supabase
       .from("Students")
@@ -17,9 +24,17 @@ const addStudent = async (req, res) => {
           email,
           department,
           semester,
+          batch_id,
         },
       ])
-      .select();
+      .select(`
+        *,
+        Batches (
+          id,
+          batch_name
+        )
+      `)
+      .single();
 
     if (error) {
       return res.status(400).json({
@@ -31,7 +46,7 @@ const addStudent = async (req, res) => {
     return res.status(201).json({
       success: true,
       message: "Student added successfully",
-      student: data[0],
+      student: data,
     });
   } catch (err) {
     return res.status(500).json({
@@ -49,7 +64,13 @@ const getStudents = async (req, res) => {
   try {
     const { data, error } = await supabase
       .from("Students")
-      .select("*")
+      .select(`
+        *,
+        Batches (
+          id,
+          batch_name
+        )
+      `)
       .order("id", { ascending: true });
 
     if (error) {
@@ -61,6 +82,47 @@ const getStudents = async (req, res) => {
 
     return res.status(200).json({
       success: true,
+      count: data.length,
+      students: data,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      error: err.message,
+    });
+  }
+};
+
+// ====================================
+// GET STUDENTS BY BATCH
+// GET /api/students/batch/:batchId
+// ====================================
+const getStudentsByBatch = async (req, res) => {
+  try {
+    const { batchId } = req.params;
+
+    const { data, error } = await supabase
+      .from("Students")
+      .select(`
+        *,
+        Batches (
+          id,
+          batch_name
+        )
+      `)
+      .eq("batch_id", batchId)
+      .order("id", { ascending: true });
+
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        error: error.message,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      batch_id: Number(batchId),
       count: data.length,
       students: data,
     });
@@ -89,7 +151,13 @@ const searchStudents = async (req, res) => {
 
     const { data, error } = await supabase
       .from("Students")
-      .select("*")
+      .select(`
+        *,
+        Batches (
+          id,
+          batch_name
+        )
+      `)
       .or(
         `full_name.ilike.%${query}%,enrollment_no.ilike.%${query}%,email.ilike.%${query}%`
       );
@@ -124,7 +192,13 @@ const getStudentById = async (req, res) => {
 
     const { data, error } = await supabase
       .from("Students")
-      .select("*")
+      .select(`
+        *,
+        Batches (
+          id,
+          batch_name
+        )
+      `)
       .eq("id", id)
       .single();
 
@@ -154,7 +228,15 @@ const getStudentById = async (req, res) => {
 const updateStudent = async (req, res) => {
   try {
     const { id } = req.params;
-    const { enrollment_no, full_name, email, department, semester } = req.body;
+
+    const {
+      enrollment_no,
+      full_name,
+      email,
+      department,
+      semester,
+      batch_id,
+    } = req.body;
 
     const { data, error } = await supabase
       .from("Students")
@@ -164,9 +246,16 @@ const updateStudent = async (req, res) => {
         email,
         department,
         semester,
+        batch_id,
       })
       .eq("id", id)
-      .select()
+      .select(`
+        *,
+        Batches (
+          id,
+          batch_name
+        )
+      `)
       .single();
 
     if (error) {
@@ -221,9 +310,13 @@ const deleteStudent = async (req, res) => {
   }
 };
 
+// ====================================
+// EXPORT
+// ====================================
 module.exports = {
   addStudent,
   getStudents,
+  getStudentsByBatch,
   searchStudents,
   getStudentById,
   updateStudent,

@@ -6,26 +6,54 @@ const {
   getAttendance,
   getAttendanceById,
   getAttendanceByStudent,
-  getAttendanceBySubject,
+  getAttendanceByTimetable,
   getAttendancePercentage,
   updateAttendance,
   deleteAttendance,
 } = require("../controllers/attendanceController");
 
+// ====================================
 // CREATE
+// ====================================
+
 router.post("/", markAttendance);
 
+// ====================================
 // READ
-router.get("/", getAttendance);
-router.get("/student/:studentId", getAttendanceByStudent);
-router.get("/subject/:subjectId", getAttendanceBySubject);
-router.get("/percentage/:studentId", getAttendancePercentage);
-router.get("/:id", getAttendanceById);
+// ====================================
 
+router.get("/", getAttendance);
+
+router.get(
+  "/student/:studentId",
+  getAttendanceByStudent
+);
+
+router.get(
+  "/timetable/:timetableId",
+  getAttendanceByTimetable
+);
+
+router.get(
+  "/percentage/:studentId",
+  getAttendancePercentage
+);
+
+router.get(
+  "/:id",
+  getAttendanceById
+);
+
+// ====================================
 // UPDATE
+// ====================================
+
 router.put("/:id", updateAttendance);
 
+// ====================================
 // DELETE
+// ====================================
+
 router.delete("/:id", deleteAttendance);
 
 module.exports = router;

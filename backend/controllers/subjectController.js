@@ -6,7 +6,13 @@ const supabase = require("../config/supabase");
 // ====================================
 const addSubject = async (req, res) => {
   try {
-    const { subject_name, subject_code, semester, department } = req.body;
+    const {
+      subject_name,
+      subject_code,
+      semester,
+      department,
+      faculty_id,
+    } = req.body;
 
     const { data, error } = await supabase
       .from("Subjects")
@@ -16,9 +22,17 @@ const addSubject = async (req, res) => {
           subject_code,
           semester,
           department,
+          faculty_id,
         },
       ])
-      .select();
+      .select(`
+        *,
+        Faculty (
+          id,
+          faculty_name
+        )
+      `)
+      .single();
 
     if (error) {
       return res.status(400).json({
@@ -30,7 +44,7 @@ const addSubject = async (req, res) => {
     return res.status(201).json({
       success: true,
       message: "Subject added successfully",
-      subject: data[0],
+      subject: data,
     });
   } catch (err) {
     return res.status(500).json({
@@ -48,7 +62,13 @@ const getSubjects = async (req, res) => {
   try {
     const { data, error } = await supabase
       .from("Subjects")
-      .select("*")
+      .select(`
+        *,
+        Faculty (
+          id,
+          faculty_name
+        )
+      `)
       .order("id", { ascending: true });
 
     if (error) {
